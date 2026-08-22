@@ -5,8 +5,8 @@ const accepted = new Set(['application/pdf','text/plain','image/jpeg','image/png
 const uploader = multer({ storage, limits: { fileSize: env.maxFileSize, files: 1 }, fileFilter: (req, file, cb) => cb(null, accepted.has(file.mimetype)) });
 router.use(authenticate);
 router.post('/chat', asyncHandler(chat.chat));
-router.get('/dashboard/state', dashboard.get); router.put('/dashboard/state', dashboard.save);
-router.get('/resources/:type', resource.list); router.post('/resources/:type', resource.create); router.get('/resources/:type/:id', resource.get); router.put('/resources/:type/:id', resource.update); router.delete('/resources/:type/:id', resource.remove);
-router.get('/documents/files/:filename', upload.download);
-router.post('/documents/upload', (req, res, next) => uploader.single('file')(req, res, err => { if (err) return next(new ApiError(err.code === 'LIMIT_FILE_SIZE' ? 413 : 400, err.code === 'LIMIT_FILE_SIZE' ? 'File exceeds the configured size limit' : err.message)); if (!req.file) return next(new ApiError(400, 'Only PDF, text, image, DOC, and DOCX files are accepted')); return next(); }), upload.upload);
+router.get('/dashboard/state', asyncHandler(dashboard.get)); router.put('/dashboard/state', asyncHandler(dashboard.save));
+router.get('/resources/:type', asyncHandler(resource.list)); router.post('/resources/:type', asyncHandler(resource.create)); router.get('/resources/:type/:id', asyncHandler(resource.get)); router.put('/resources/:type/:id', asyncHandler(resource.update)); router.delete('/resources/:type/:id', asyncHandler(resource.remove));
+router.get('/documents/files/:filename', asyncHandler(upload.download));
+router.post('/documents/upload', (req, res, next) => uploader.single('file')(req, res, err => { if (err) return next(new ApiError(err.code === 'LIMIT_FILE_SIZE' ? 413 : 400, err.code === 'LIMIT_FILE_SIZE' ? 'File exceeds the configured size limit' : err.message)); if (!req.file) return next(new ApiError(400, 'Only PDF, text, image, DOC, and DOCX files are accepted')); return next(); }), asyncHandler(upload.upload));
 module.exports = router;

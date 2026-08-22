@@ -10,4 +10,4 @@ npm test
 npm start
 ```
 
-Use Node.js 22.5 or newer. The API is served at `http://localhost:3000`; its health check is `GET /health`.
+Use Node.js 22.5 or newer. Configure Supabase and Gemini variables in `.env`; apply the SQL migration documented in the root README before production use. The API is served at `http://localhost:3000`; its health check is `GET /health`.

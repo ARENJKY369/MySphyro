@@ -13,7 +13,7 @@ No frontend build step is required. Existing local data and the deterministic AI
 
 ## Backend quick start
 
-**Requires Node.js 22.5+** for the built-in SQLite driver.
+**Requires Node.js 22.5+**. Production persistence and authentication use Supabase.
 
 ```bash
 cd backend
@@ -23,7 +23,7 @@ npm install
 npm start
 ```
 
-The API listens on `http://localhost:3000`; use `npm run dev` for Node watch mode and `npm test` for the API suite. The SQLite database is created automatically at `backend/data/mysphyro.db`; schema creation is idempotent, so no separate migration command is needed for this version.
+The API listens on `http://localhost:3000`; use `npm run dev` for Node watch mode and `npm test` for the API suite. Apply `supabase/migrations/20260822_initial_schema.sql` through the Supabase CLI (`supabase db push`) or SQL Editor before starting the production API. The isolated SQLite adapter is used only for automated tests without cloud credentials.
 
 ## Environment
 
@@ -31,9 +31,11 @@ The API listens on `http://localhost:3000`; use `npm run dev` for Node watch mod
 | --- | --- | --- |
 | `NODE_ENV` | No | `development`, `test`, or `production`; defaults to development. |
 | `API_PORT` | No | API port; defaults to `3000`. |
-| `DATABASE_PATH` | No | SQLite file path relative to `backend/`; defaults to `./data/mysphyro.db`. |
-| `JWT_SECRET` | Yes in production | Long random signing secret. |
-| `JWT_EXPIRES_IN` | No | JWT lifetime; defaults to `7d`. |
+| `SUPABASE_URL` | Yes in production | Your Supabase project URL. |
+| `SUPABASE_SERVICE_ROLE_KEY` | Yes in production | Server-only Supabase service-role key; never expose it to the browser. |
+| `GEMINI_API_KEY` | Yes in production | Server-only Gemini API key used by `/api/v1/chat`. |
+| `GEMINI_MODEL` | No | Gemini model name; defaults to `gemini-2.5-flash`. |
+| `DATABASE_PATH` | Tests only | Isolated local SQLite test database path. |
 | `CORS_ORIGINS` | No | Comma-separated permitted browser origins. Empty permits local development origins. |
 | `UPLOAD_DIR` | No | Upload storage path; defaults to `./uploads`. |
 | `MAX_FILE_SIZE_MB` | No | Per-file upload cap; defaults to `10`. |
@@ -87,4 +89,4 @@ Valid `:type` values: `tasks`, `documents`, `expenses`, `plans`, `personal`, `cl
 { "data": { "title": "Finish DBMS assignment", "due": "Friday", "priority": "high", "category": "College", "done": false } }
 ```
 
-The API enforces ownership on every protected resource, uses bcrypt password hashes and signed JWTs, validates request bodies, applies Helmet, request IDs/logging, CORS controls, auth/API rate limits, file type/size controls, and centralized errors.
+The API uses Supabase Auth for secure password hashing and JWTs, validates request bodies, applies Helmet, request IDs/logging, CORS controls, auth/API rate limits, file type/size controls, Supabase row-level security, and centralized errors. Gemini receives only a bounded, validated dashboard summary; the API returns a local fallback if the provider is unavailable.

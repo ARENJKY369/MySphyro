@@ -1,9 +1,3 @@
-const jwt = require('jsonwebtoken');
-const env = require('../config/env');
-const { ApiError } = require('../utils/errors');
-function authenticate(req, res, next) {
-  const token = req.get('authorization')?.replace(/^Bearer\s+/i, '');
-  if (!token) return next(new ApiError(401, 'Authentication is required'));
-  try { req.user = jwt.verify(token, env.jwtSecret); return next(); } catch { return next(new ApiError(401, 'Invalid or expired access token')); }
-}
+const jwt = require('jsonwebtoken'); const env = require('../config/env'); const { supabase, usesSupabase } = require('../db/client'); const { ApiError } = require('../utils/errors');
+async function authenticate(req, res, next) { const token = req.get('authorization')?.replace(/^Bearer\s+/i, ''); if (!token) return next(new ApiError(401, 'Authentication is required')); try { if (usesSupabase) { const { data, error } = await supabase.auth.getUser(token); if (error || !data.user) throw new Error('invalid'); req.user = { sub: data.user.id, email: data.user.email, name: data.user.user_metadata?.name }; } else req.user = jwt.verify(token, env.jwtSecret); return next(); } catch { return next(new ApiError(401, 'Invalid or expired access token')); } }
 module.exports = { authenticate };
