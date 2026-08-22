@@ -1,0 +1,21 @@
+{
+  "name": "mysphyro",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Vercel deployment wrapper for the MySphyro frontend and API",
+  "engines": { "node": ">=22.5.0" },
+  "scripts": { "test": "npm --prefix backend test" },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "@supabase/supabase-js": "^2.49.4",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "multer": "^2.0.0"
+  }
+}

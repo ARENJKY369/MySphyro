@@ -25,6 +25,36 @@ npm start
 
 The API listens on `http://localhost:3000`; use `npm run dev` for Node watch mode and `npm test` for the API suite. Apply `supabase/migrations/20260822_initial_schema.sql` through the Supabase CLI (`supabase db push`) or SQL Editor before starting the production API. The isolated SQLite adapter is used only for automated tests without cloud credentials.
 
+
+## Deploying on Vercel
+
+This repository includes `api/[...path].js` and `vercel.json`, so deploy the **repository root** as one Vercel project: static files are the frontend and `/api/v1/*` is the serverless Express API.
+
+1. Create a Supabase project, then run `backend/supabase/migrations/20260822_initial_schema.sql` in the Supabase SQL Editor (or run `supabase db push`). This creates the application tables, RLS policies, and the private `documents` Storage bucket.
+2. In Vercel, click **Add New → Project**, import this Git repository, and retain the root directory as `./`. Vercel automatically detects the root `package.json`; no build command is needed for the static frontend.
+3. Under **Project Settings → Environment Variables**, add these values for Production, Preview, and Development as appropriate:
+
+   ```text
+   SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
+   SUPABASE_SERVICE_ROLE_KEY=your-server-only-service-role-key
+   GEMINI_API_KEY=your-gemini-api-key
+   GEMINI_MODEL=gemini-2.5-flash
+   SUPABASE_UPLOAD_BUCKET=documents
+   NODE_ENV=production
+   CORS_ORIGINS=https://your-domain.vercel.app,https://your-custom-domain.com
+   ```
+
+   Do not set `SUPABASE_SERVICE_ROLE_KEY` or `GEMINI_API_KEY` as `NEXT_PUBLIC_*`, `VITE_*`, or any browser-visible environment variable.
+4. Deploy. Confirm `https://your-domain.vercel.app/api/health` returns an `ok` response. The frontend calls the same-origin `/api/v1` path by default, so it works without `localhost` configuration.
+5. In Supabase **Authentication → URL Configuration**, add your deployed Vercel URL and custom domain to the allowed Site URL / redirect URLs. If email confirmation is enabled, a new registration returns `confirmationRequired: true` until the user verifies email.
+
+### Vercel operational notes
+
+- Vercel’s function filesystem is temporary. Uploaded files are therefore sent to the private Supabase Storage `documents` bucket; they are not retained in Vercel.
+- The Vercel function uses a server-side Supabase service-role key. Keep that key in Vercel environment settings only and rotate it if exposed.
+- `/api/v1/documents/files/:filename` checks the authenticated owner before retrieving a file from Supabase Storage.
+- For a local static frontend served separately, set `window.MYSPHYRO_API_URL = 'http://localhost:3000/api/v1'`; Vercel does not need this override.
+
 ## Environment
 
 | Variable | Required | Description |

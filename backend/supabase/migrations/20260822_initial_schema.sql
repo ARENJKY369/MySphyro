@@ -14,3 +14,7 @@ alter table public.resources enable row level security; alter table public.dashb
 create policy "own resources" on public.resources for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 create policy "own dashboard state" on public.dashboard_states for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 create policy "own uploads" on public.uploads for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- Private object storage used by the Vercel serverless upload endpoint.
+insert into storage.buckets (id, name, public) values ('documents', 'documents', false) on conflict (id) do nothing;
+create policy "private document owner access" on storage.objects for all using (bucket_id = 'documents' and auth.uid()::text = (storage.foldername(name))[1]) with check (bucket_id = 'documents' and auth.uid()::text = (storage.foldername(name))[1]);

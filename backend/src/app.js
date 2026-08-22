@@ -7,6 +7,6 @@ app.use(cors({ origin(origin, cb) { if (!origin || env.corsOrigins.length === 0 
 app.use(morgan(env.nodeEnv === 'production' ? 'combined' : ':method :url :status :response-time ms'));
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, limit: 500, standardHeaders: 'draft-7', legacyHeaders: false }));
 app.use(express.json({ limit: '1mb', strict: true }));
-app.get('/health', (req, res) => res.status(200).json({ success: true, data: { status: 'ok', timestamp: new Date().toISOString(), environment: env.nodeEnv } }));
+app.get(['/health', '/api/health'], (req, res) => res.status(200).json({ success: true, data: { status: 'ok', timestamp: new Date().toISOString(), environment: env.nodeEnv } }));
 app.use('/api/v1/auth', authRoutes); app.use('/api/v1', apiRoutes);
 app.use(notFound); app.use(errorHandler); module.exports = app;

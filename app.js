@@ -49,7 +49,7 @@ let state;
 try { state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || structuredClone(defaultState); } catch { state = structuredClone(defaultState); }
 const el = s => document.querySelector(s);
 const els = s => [...document.querySelectorAll(s)];
-const API_BASE = window.MYSPHYRO_API_URL || (location.protocol.startsWith('http') ? `${location.protocol}//${location.hostname}:3000/api/v1` : '');
+const API_BASE = window.MYSPHYRO_API_URL || '/api/v1';
 const API_TOKEN_KEY = 'mysphyro-api-token';
 const apiToken = () => localStorage.getItem(API_TOKEN_KEY) || window.MYSPHYRO_API_TOKEN;
 let syncTimer;
