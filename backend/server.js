@@ -1,33 +1,6 @@
 require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-
-const app = express();
-const PORT = process.env.API_PORT || 3000;
-
-// Middleware
-app.use(cors());
-app.use(express.json());
-
-// Import routes
-const apiRoutes = require('./routes/api');
-
-// Use routes
-app.use('/api', apiRoutes);
-
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.json({ status: 'Backend running', timestamp: new Date() });
-});
-
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error('Error:', err);
-  res.status(500).json({ error: 'Internal server error', message: err.message });
-});
-
-// Start server
-app.listen(PORT, () => {
-  console.log(`🚀 MySphyro Backend running on http://localhost:${PORT}`);
-  console.log(`📝 API endpoints available at http://localhost:${PORT}/api`);
-});
+const env = require('./src/config/env');
+const app = require('./src/app');
+const server = app.listen(env.port, '0.0.0.0', () => console.log(`MySphyro API listening on http://0.0.0.0:${env.port}`));
+function shutdown(signal) { console.log(`${signal} received; shutting down`); server.close(() => process.exit(0)); setTimeout(() => process.exit(1), 10000).unref(); }
+process.on('SIGTERM', () => shutdown('SIGTERM')); process.on('SIGINT', () => shutdown('SIGINT'));

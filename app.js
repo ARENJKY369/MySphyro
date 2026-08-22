@@ -49,7 +49,21 @@ let state;
 try { state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || structuredClone(defaultState); } catch { state = structuredClone(defaultState); }
 const el = s => document.querySelector(s);
 const els = s => [...document.querySelectorAll(s)];
-const save = () => localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+const API_BASE = window.MYSPHYRO_API_URL || (location.protocol.startsWith('http') ? `${location.protocol}//${location.hostname}:3000/api/v1` : '');
+const API_TOKEN_KEY = 'mysphyro-api-token';
+const apiToken = () => localStorage.getItem(API_TOKEN_KEY) || window.MYSPHYRO_API_TOKEN;
+let syncTimer;
+async function apiRequest(path, options = {}) {
+  if (!API_BASE || !apiToken()) return null;
+  const response = await fetch(`${API_BASE}${path}`, { ...options, headers: { Authorization: `Bearer ${apiToken()}`, ...(options.headers || {}) } });
+  if (!response.ok) throw new Error((await response.json().catch(() => null))?.error?.message || 'API request failed');
+  return response.status === 204 ? null : response.json();
+}
+function queueSync() {
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => apiRequest('/dashboard/state', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ state }) }).catch(() => {}), 700);
+}
+const save = () => { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); queueSync(); };
 const money = n => `₹${Math.round(n).toLocaleString('en-IN')}`;
 const today = new Date();
 let calendarCursor = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -136,7 +150,12 @@ function chatRespond(text){
   return `Got it. I can help you connect tasks, documents, money, college and plans. Try “What should I do next?”, “Can I afford ₹1500?” or “Summarize my week.”`;
 }
 function addChatMessage(text,who='ai'){const d=document.createElement('div');d.className=`message ${who}`;d.textContent=text;el('#chatMessages').appendChild(d);el('#chatMessages').scrollTop=el('#chatMessages').scrollHeight;}
-function sendChat(){const input=el('#chatInput');const text=input.value.trim();if(!text)return;addChatMessage(text,'user');input.value='';setTimeout(()=>{addChatMessage(chatRespond(text),'ai');renderAssistant();},180);}
+async function sendChat(){
+  const input=el('#chatInput');const text=input.value.trim();if(!text)return;addChatMessage(text,'user');input.value='';
+  try { const response=await apiRequest('/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:text,context:state})}); addChatMessage(response?.data?.reply || chatRespond(text),'ai'); }
+  catch { addChatMessage(chatRespond(text),'ai'); }
+  renderAssistant();
+}
 
 // Events
 els('[data-view]').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
@@ -148,7 +167,14 @@ el('#nextThingBtn').onclick=()=>{setView('assistant');setTimeout(()=>{el('#chatI
 el('#customizeSphere').onclick=()=>toast('Sphere customization is ready for the next build.');
 el('#addTaskBtn').onclick=addTask;el('#addExpenseBtn').onclick=addExpense;el('#addPersonalBtn').onclick=addPersonal;el('#addClassBtn').onclick=addClass;el('#createPlanBtn').onclick=createPlan;
 el('#autoPrioritizeBtn').onclick=()=>{state.tasks.sort((a,b)=>({high:0,med:1,low:2}[a.priority]-({high:0,med:1,low:2}[b.priority])));save();renderTasks();toast('Tasks re-prioritized.');};
-el('#docInput').addEventListener('change',e=>{[...e.target.files].forEach(f=>{state.docs.unshift({id:Date.now()+Math.random(),name:f.name,type:(f.name.split('.').pop()||'FILE').toUpperCase().slice(0,4),size:(f.size/1024/1024).toFixed(1)+' MB',tag:'Uploaded',date:'just now',important:'AI scan pending'});state.activities.unshift({icon:'□',title:'Added new document',meta:`${f.name} · just now`});});save();renderDocs();renderDashboard();toast(`${e.target.files.length} document${e.target.files.length===1?'':'s'} added.`);e.target.value='';});
+el('#docInput').addEventListener('change',async e=>{
+  const files=[...e.target.files];
+  for(const f of files){
+    let url; try { const form=new FormData();form.append('file',f);const response=await apiRequest('/documents/upload',{method:'POST',body:form});url=response?.data?.url; } catch {}
+    state.docs.unshift({id:Date.now()+Math.random(),name:f.name,type:(f.name.split('.').pop()||'FILE').toUpperCase().slice(0,4),size:(f.size/1024/1024).toFixed(1)+' MB',tag:'Uploaded',date:'just now',important:'AI scan pending',...(url?{url}:{})});state.activities.unshift({icon:'□',title:'Added new document',meta:`${f.name} · just now`});
+  }
+  save();renderDocs();renderDashboard();toast(`${files.length} document${files.length===1?'':'s'} added.`);e.target.value='';
+});
 el('#docSearch').addEventListener('input',renderDocs);el('#prevMonth').onclick=()=>{calendarCursor.setMonth(calendarCursor.getMonth()-1);renderCalendar();};el('#nextMonth').onclick=()=>{calendarCursor.setMonth(calendarCursor.getMonth()+1);renderCalendar();};
 
 els('[data-task-filter]').forEach(b=>b.onclick=()=>{els('[data-task-filter]').forEach(x=>x.classList.remove('active'));b.classList.add('active');renderTasks(b.dataset.taskFilter);});
