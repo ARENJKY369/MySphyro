@@ -1,0 +1,12 @@
+const crypto = require('crypto'); const express = require('express'); const cors = require('cors'); const helmet = require('helmet'); const morgan = require('morgan'); const rateLimit = require('express-rate-limit'); const { ApiError } = require('./utils/errors'); const env = require('./config/env'); const authRoutes = require('./routes/auth-routes'); const apiRoutes = require('./routes/api-routes'); const { notFound, errorHandler } = require('./middleware/error');
+const app = express();
+app.disable('x-powered-by');
+app.use((req, res, next) => { req.id = crypto.randomUUID(); res.setHeader('X-Request-Id', req.id); next(); });
+app.use(helmet({ crossOriginResourcePolicy: false }));
+app.use(cors({ origin(origin, cb) { if (!origin || env.corsOrigins.length === 0 || env.corsOrigins.includes(origin)) return cb(null, true); return cb(new ApiError(403, 'Origin not permitted by CORS policy'));  }, methods: ['GET','POST','PUT','DELETE'], allowedHeaders: ['Content-Type','Authorization'] }));
+app.use(morgan(env.nodeEnv === 'production' ? 'combined' : ':method :url :status :response-time ms'));
+app.use(rateLimit({ windowMs: 15 * 60 * 1000, limit: 500, standardHeaders: 'draft-7', legacyHeaders: false }));
+app.use(express.json({ limit: '1mb', strict: true }));
+app.get(['/health', '/api/health'], (req, res) => res.status(200).json({ success: true, data: { status: 'ok', timestamp: new Date().toISOString(), environment: env.nodeEnv } }));
+app.use('/api/v1/auth', authRoutes); app.use('/api/v1', apiRoutes);
+app.use(notFound); app.use(errorHandler); module.exports = app;

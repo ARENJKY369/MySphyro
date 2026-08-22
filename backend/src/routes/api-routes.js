@@ -1,0 +1,12 @@
+const router = require('express').Router(); const multer = require('multer'); const fs = require('fs'); const path = require('path'); const env = require('../config/env'); const { authenticate } = require('../middleware/auth'); const resource = require('../controllers/resource-controller'); const dashboard = require('../controllers/dashboard-controller'); const upload = require('../controllers/upload-controller'); const { ApiError } = require('../utils/errors'); const chat = require('../controllers/chat-controller'); const asyncHandler = require('../utils/async-handler');
+fs.mkdirSync(env.uploadDir, { recursive: true });
+const storage = multer.diskStorage({ destination: env.uploadDir, filename: (req, file, cb) => cb(null, `${Date.now()}-${Math.random().toString(36).slice(2)}${path.extname(file.originalname).toLowerCase()}`) });
+const accepted = new Set(['application/pdf','text/plain','image/jpeg','image/png','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document']);
+const uploader = multer({ storage, limits: { fileSize: env.maxFileSize, files: 1 }, fileFilter: (req, file, cb) => cb(null, accepted.has(file.mimetype)) });
+router.use(authenticate);
+router.post('/chat', asyncHandler(chat.chat));
+router.get('/dashboard/state', asyncHandler(dashboard.get)); router.put('/dashboard/state', asyncHandler(dashboard.save));
+router.get('/resources/:type', asyncHandler(resource.list)); router.post('/resources/:type', asyncHandler(resource.create)); router.get('/resources/:type/:id', asyncHandler(resource.get)); router.put('/resources/:type/:id', asyncHandler(resource.update)); router.delete('/resources/:type/:id', asyncHandler(resource.remove));
+router.get('/documents/files/:filename', asyncHandler(upload.download));
+router.post('/documents/upload', (req, res, next) => uploader.single('file')(req, res, err => { if (err) return next(new ApiError(err.code === 'LIMIT_FILE_SIZE' ? 413 : 400, err.code === 'LIMIT_FILE_SIZE' ? 'File exceeds the configured size limit' : err.message)); if (!req.file) return next(new ApiError(400, 'Only PDF, text, image, DOC, and DOCX files are accepted')); return next(); }), asyncHandler(upload.upload));
+module.exports = router;

@@ -1,0 +1,3 @@
+const router = require('express').Router(); const rateLimit = require('express-rate-limit'); const auth = require('../controllers/auth-controller'); const { authenticate } = require('../middleware/auth'); const asyncHandler = require('../utils/async-handler');
+const authLimit = rateLimit({ windowMs: 15 * 60 * 1000, limit: 20, standardHeaders: 'draft-7', legacyHeaders: false, message: { success: false, error: { message: 'Too many authentication attempts. Try again later.' } } });
+router.post('/register', authLimit, asyncHandler(auth.register)); router.post('/login', authLimit, asyncHandler(auth.login)); router.get('/me', authenticate, auth.me); module.exports = router;

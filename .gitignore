@@ -1,0 +1,8 @@
+# Dependencies and local runtime data
+node_modules/
+backend/node_modules/
+backend/data/
+backend/uploads/
+backend/.env
+.env
+*.log
