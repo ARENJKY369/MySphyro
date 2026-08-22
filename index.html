@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#2563EB" />
+  <title>MYSPHYRO — Everything. Together.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell" id="appShell">
+    <aside class="sidebar">
+      <div class="brand-row">
+        <div class="brand-mark" aria-hidden="true"><span>M</span></div>
+        <div>
+          <div class="brand-name">MYSPHYRO</div>
+          <div class="brand-tag">EVERYTHING. TOGETHER.</div>
+        </div>
+      </div>
+
+      <nav class="nav" aria-label="Primary">
+        <button class="nav-item active" data-view="dashboard"><span>⌂</span><b>Dashboard</b></button>
+        <button class="nav-item" data-view="tasks"><span>✓</span><b>Tasks</b><em id="navTaskCount">0</em></button>
+        <button class="nav-item" data-view="college"><span>▣</span><b>College</b></button>
+        <button class="nav-item" data-view="documents"><span>□</span><b>Documents</b><em id="navDocCount">0</em></button>
+        <button class="nav-item" data-view="money"><span>₹</span><b>Money</b></button>
+        <button class="nav-item" data-view="calendar"><span>◫</span><b>Calendar</b></button>
+        <button class="nav-item" data-view="plans"><span>↗</span><b>Plans</b></button>
+        <button class="nav-item" data-view="personal"><span>♡</span><b>Personal</b></button>
+        <button class="nav-item" data-view="assistant"><span>✦</span><b>AI Assistant</b></button>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <div class="streak-card">
+          <div class="muted">STREAK</div>
+          <strong id="streakValue">12</strong><span>days</span>
+          <div class="mini-chart"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        </div>
+        <button class="profile-mini" id="openProfile"><span class="avatar">K</span><span><b>Kirat</b><small>View profile</small></span></button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="mobile-menu" id="mobileMenu" aria-label="Open menu">☰</button>
+        <div class="page-heading"><h1 id="pageTitle">Good morning, Kirat 👋</h1><p id="pageSubtitle">Here's your world, all in sync.</p></div>
+        <div class="top-actions">
+          <div class="search-box"><span>⌕</span><input id="globalSearch" placeholder="Search anything..." autocomplete="off" /></div>
+          <button class="icon-btn" id="notifBtn" aria-label="Notifications">♧<span class="notification-dot"></span></button>
+          <button class="theme-btn" id="themeBtn"><span>◐</span><span>Theme</span></button>
+        </div>
+      </header>
+
+      <section class="view active" id="view-dashboard">
+        <div class="dashboard-grid">
+          <article class="card ai-hero">
+            <div class="card-label"><span class="ai-orb">✦</span> MYSPHYRO AI</div>
+            <h2 id="aiHeroTitle">You have 3 important things today.</h2>
+            <div class="priority-list" id="priorityList"></div>
+            <div class="hero-actions"><button class="btn primary" id="planDayBtn">Plan My Day <span>→</span></button><button class="btn ghost" id="nextThingBtn">What next?</button></div>
+          </article>
+
+          <article class="card schedule-card">
+            <div class="section-head"><div><span class="card-label">TODAY'S SCHEDULE</span><h3 id="scheduleDate">Today</h3></div><button class="text-btn" data-view-jump="calendar">Full calendar →</button></div>
+            <div class="timeline" id="todayTimeline"></div>
+          </article>
+
+          <article class="card focus-card">
+            <div class="card-label">FOCUS SCORE</div>
+            <div class="ring" id="focusRing"><strong id="focusScore">82%</strong><span>on track</span></div>
+            <div class="week-bars" id="weekBars"></div>
+          </article>
+        </div>
+
+        <article class="card sphere-card">
+          <div class="section-head"><div><span class="card-label">YOUR SPHERE</span><h3>Everything in your world, connected.</h3></div><button class="btn ghost small" id="customizeSphere">Customize</button></div>
+          <div class="sphere-grid" id="sphereGrid"></div>
+        </article>
+
+        <div class="two-col">
+          <article class="card">
+            <div class="section-head"><div><span class="card-label">RECENT ACTIVITY</span><h3>What's changed</h3></div><button class="text-btn" data-view-jump="assistant">Ask AI →</button></div>
+            <div id="activityList" class="activity-list"></div>
+          </article>
+          <article class="card">
+            <div class="section-head"><div><span class="card-label">AI INSIGHTS</span><h3>Personal nudges</h3></div></div>
+            <div class="insight-list" id="insightList"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="view" id="view-tasks">
+        <div class="view-toolbar"><div><span class="eyebrow">TASKS</span><h2>Get it done.</h2><p>Capture, prioritize and finish what matters.</p></div><button class="btn primary" id="addTaskBtn">+ Add task</button></div>
+        <div class="filter-row"><button class="chip active" data-task-filter="all">All</button><button class="chip" data-task-filter="high">High priority</button><button class="chip" data-task-filter="today">Today</button><button class="chip" data-task-filter="done">Completed</button></div>
+        <div class="task-layout"><div class="task-list" id="taskList"></div><aside class="card side-tip"><div class="ai-orb">✦</div><h3>Smart priority</h3><p>MYSPHYRO scores tasks using deadline, effort and importance so you always know what to do next.</p><button class="btn ghost" id="autoPrioritizeBtn">Auto-prioritize</button></aside></div>
+      </section>
+
+      <section class="view" id="view-college">
+        <div class="view-toolbar"><div><span class="eyebrow">COLLEGE</span><h2>Your academic hub.</h2><p>Classes, assignments, exams and notices in one place.</p></div><button class="btn primary" id="addClassBtn">+ Add class</button></div>
+        <div class="stats-grid" id="collegeStats"></div>
+        <div class="two-col"><article class="card"><div class="section-head"><div><span class="card-label">TODAY</span><h3>Classes</h3></div></div><div id="classList" class="class-list"></div></article><article class="card"><div class="section-head"><div><span class="card-label">DEADLINES</span><h3>Academic tasks</h3></div></div><div id="assignmentList" class="activity-list"></div></article></div>
+      </section>
+
+      <section class="view" id="view-documents">
+        <div class="view-toolbar"><div><span class="eyebrow">DOCUMENTS</span><h2>Your files, understood.</h2><p>Upload PDFs or notes. MYSPHYRO turns important dates into actionable items.</p></div><label class="btn primary upload-btn">+ Upload document<input id="docInput" type="file" multiple hidden></label></div>
+        <div class="doc-search-row"><div class="search-box full"><span>⌕</span><input id="docSearch" placeholder="Search documents..." /></div><div class="muted-pill">AI indexing ready</div></div>
+        <div class="document-grid" id="documentGrid"></div>
+      </section>
+
+      <section class="view" id="view-money">
+        <div class="view-toolbar"><div><span class="eyebrow">MONEY</span><h2>Know where it goes.</h2><p>Track spending, set a budget and make better decisions.</p></div><button class="btn primary" id="addExpenseBtn">+ Add expense</button></div>
+        <div class="money-grid"><article class="card balance-card"><span class="card-label">THIS MONTH</span><strong id="balanceValue">₹2,450</strong><span class="muted">left from ₹8,000</span><div class="budget-progress"><span id="budgetProgress"></span></div><div class="budget-meta"><span>₹5,550 spent</span><span>69%</span></div></article><article class="card"><span class="card-label">DAILY SAFE SPEND</span><strong id="dailySafeSpend">₹245</strong><p class="muted">Based on your remaining budget and days left.</p></article><article class="card"><span class="card-label">TOP CATEGORY</span><strong id="topCategory">Food</strong><p class="muted" id="topCategoryText">₹1,850 this month</p></article></div>
+        <div class="two-col"><article class="card"><div class="section-head"><div><span class="card-label">RECENT EXPENSES</span><h3>Transactions</h3></div></div><div id="expenseList" class="activity-list"></div></article><article class="card"><div class="section-head"><div><span class="card-label">SPENDING MIX</span><h3>Where your money goes</h3></div></div><div id="spendingMix" class="spending-mix"></div></article></div>
+      </section>
+
+      <section class="view" id="view-calendar">
+        <div class="view-toolbar"><div><span class="eyebrow">CALENDAR</span><h2>See the whole week.</h2><p>Classes, deadlines, plans and personal events together.</p></div><div class="calendar-controls"><button class="icon-btn" id="prevMonth">‹</button><strong id="calendarTitle">August 2026</strong><button class="icon-btn" id="nextMonth">›</button></div></div>
+        <article class="card calendar-card"><div class="calendar-weekdays"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div><div class="calendar-grid" id="calendarGrid"></div></article>
+      </section>
+
+      <section class="view" id="view-plans">
+        <div class="view-toolbar"><div><span class="eyebrow">PLANS</span><h2>Turn goals into motion.</h2><p>Build weekly plans with realistic time blocks.</p></div><button class="btn primary" id="createPlanBtn">+ Create plan</button></div>
+        <div class="plans-grid" id="plansGrid"></div>
+      </section>
+
+      <section class="view" id="view-personal">
+        <div class="view-toolbar"><div><span class="eyebrow">PERSONAL</span><h2>The little things matter too.</h2><p>Keep personal requirements, habits and reminders alongside everything else.</p></div><button class="btn primary" id="addPersonalBtn">+ Add requirement</button></div>
+        <div class="personal-layout"><article class="card"><div class="section-head"><div><span class="card-label">MY LIST</span><h3>Personal requirements</h3></div></div><div id="personalList" class="check-list"></div></article><article class="card mood-card"><span class="card-label">TODAY'S VIBE</span><h3 id="moodTitle">Productive</h3><div class="mood-row"><button data-mood="Focused">🎯</button><button data-mood="Calm">🌿</button><button data-mood="Energetic">⚡</button><button data-mood="Creative">✨</button><button data-mood="Social">🫶</button></div><p id="moodCopy">Keep the momentum; small wins count.</p></article></div>
+      </section>
+
+      <section class="view" id="view-assistant">
+        <div class="view-toolbar"><div><span class="eyebrow">AI ASSISTANT</span><h2>Just tell MYSPHYRO.</h2><p>Ask about your tasks, documents, budget or plans.</p></div></div>
+        <div class="assistant-layout"><article class="card chat-card"><div class="chat-messages" id="chatMessages"></div><div class="chat-composer"><input id="chatInput" placeholder="e.g. What should I do next?"/><button class="btn primary" id="sendChat">Send</button></div><div class="suggestion-row"><button class="chip" data-prompt="What should I do next?">What next?</button><button class="chip" data-prompt="Can I afford a ₹1500 purchase?">Can I afford this?</button><button class="chip" data-prompt="Summarize my week">Summarize my week</button></div></article><aside class="card assistant-side"><div class="ai-orb large">✦</div><h3>MYSPHYRO AI</h3><p>This demo uses your local dashboard data to make contextual recommendations.</p><div class="assistant-stat"><span>Tracked items</span><b id="trackedItemsCount">0</b></div><div class="assistant-stat"><span>Open tasks</span><b id="assistantOpenTasks">0</b></div><div class="assistant-stat"><span>Budget left</span><b id="assistantBudgetLeft">₹0</b></div></aside></div>
+      </section>
+
+      <footer class="footer"><span>MYSPHYRO</span><span>Everything. Together.</span><span>© 2026</span></footer>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="modalBackdrop" hidden><div class="modal" id="modal"></div></div>
+  <div class="toast-stack" id="toastStack"></div>
+  <script src="app.js"></script>
+</body>
+</html>
